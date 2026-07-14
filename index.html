@@ -37,6 +37,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .sess-btn:hover{background:var(--bg);color:var(--navy)}
 .sess-btn.danger{border-color:#FCA5A5;color:#991B1B}
 .sess-btn.danger:hover{background:#FEF2F2}
+.sess-btn.bake{border-color:#A7F3D0;color:#065F46;font-weight:700}
+.sess-btn.bake:hover{background:#ECFDF5}
 .scards{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
 .sc{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:9px 12px;display:flex;align-items:center;gap:9px}
 .sc-ico{width:28px;height:28px;border-radius:var(--rs);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
@@ -228,6 +230,7 @@ td.tn{font-weight:600;color:var(--navy)}
     <button class="sess-btn" onclick="saveSession()">💾 Save session</button>
     <button class="sess-btn" onclick="document.getElementById('sfi').click()">📂 Load session</button>
     <input type="file" id="sfi" accept=".json" onchange="loadSession(event)" style="display:none">
+    <button class="sess-btn bake" onclick="bakeData()" title="Embed data into app — upload to GitHub for instant loading">⚡ Bake data into app</button>
     <button class="sess-btn danger" onclick="clearAll()">🗑 Clear all</button>
     <span id="sess-status" style="font-size:11px;color:var(--muted);margin-left:4px"></span>
   </div>
@@ -712,11 +715,9 @@ var DAY_ORDER = {monday:0,tuesday:1,wednesday:2,thursday:3,friday:4,saturday:5,s
 var REQUIRED  = ['studentName','formClass','level','subject','stream','subjectTeacher','day','startTime','endTime','venue'];
 var ALL_FKEYS = ['level','formClass','subject','stream','subjectTeacher','day','week','startTime','endTime','venue'];
 var LVL_FKEYS = ['formClass','subject','stream','subjectTeacher','day','week','startTime','endTime','venue'];
-var STORAGE_KEY = 'sfinder_v6';
 
 // One file per level tab: {s1:{rows,name,label}, s2:...}
 var lvlData = {s1:null, s2:null, s3:null, s4:null};
-var lsOk    = false;
 var curTab  = 'all';
 var tState  = {};
 TABS.forEach(function(t) { tState[t] = {filtered:[],selected:null,view:'card',sort:''}; });
@@ -975,43 +976,25 @@ function updateChip(tid) {
   if (cr) cr.style.display='flex';
 }
 
-// ══════════════════ LOCAL STORAGE ══════════════════
-function checkLS() {
-  try { localStorage.setItem('__t__','1'); localStorage.removeItem('__t__'); return true; } catch(e){return false;}
-}
+// ══════════════════ SESSION FILE (no localStorage — works for any data size) ══════════════════
 function saveLS() {
-  if (!lsOk) { setSessStatus('Auto-save unavailable — use 💾 Save session'); return; }
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({d:lvlData}));
-    setSessStatus('Auto-saved ✓');
-  } catch(e) {
-    setSessStatus('Auto-save failed — use 💾 Save session');
-    toast('Storage full. Use 💾 Save session to keep data.','err');
-  }
+  // localStorage removed — data too large. Session file is the save method.
+  setSessStatus('💾 Remember to Save session before closing!');
 }
-function loadLS() {
-  if (!lsOk) return false;
-  try {
-    var raw=localStorage.getItem(STORAGE_KEY); if(!raw) return false;
-    var p=JSON.parse(raw);
-    if (p && p.d) { lvlData=p.d; return true; }
-    return false;
-  } catch(e){return false;}
-}
+
 function clearAll() {
-  if (!confirm('Remove all student data from this device?')) return;
+  if (!confirm('Remove all student data from this page?')) return;
   lvlData={s1:null,s2:null,s3:null,s4:null};
-  if (lsOk) try{localStorage.removeItem(STORAGE_KEY);}catch(e){}
   ['s1','s2','s3','s4'].forEach(updateChip);
   refreshAll();
   setSessStatus('');
   toast('All data cleared','ok');
 }
+
 function setSessStatus(msg) {
   var el=gid('sess-status'); if(el) el.textContent=msg;
 }
 
-// ── Session file ──
 function saveSession() {
   var all=getAllData();
   if (!all.length) { toast('No data to save.','err'); return; }
@@ -1019,8 +1002,10 @@ function saveSession() {
   a.href=URL.createObjectURL(new Blob([JSON.stringify({_t:'sfdr6',d:lvlData})],{type:'application/json'}));
   a.download='StudentFinder_'+new Date().toISOString().slice(0,10)+'.json';
   a.click();
-  toast('Session file saved.','ok');
+  setSessStatus('Session saved ✓ — load it next time to restore your data');
+  toast('Session file saved — keep it safe!','ok');
 }
+
 function loadSession(e) {
   var file=e.target.files[0]; if(!file) return;
   var reader=new FileReader();
@@ -1030,7 +1015,8 @@ function loadSession(e) {
       if (p._t==='sfdr6' && p.d) {
         lvlData=p.d;
         ['s1','s2','s3','s4'].forEach(updateChip);
-        saveLS(); refreshAll();
+        refreshAll();
+        setSessStatus('💾 Remember to Save session before closing!');
         toast('Session restored.','ok');
       } else throw new Error('Unknown format');
     } catch(err){ toast('Could not read session file.','err'); }
@@ -1333,21 +1319,50 @@ function toast(msg,type){
   setTimeout(function(){t.remove();},4000);
 }
 
+// ══════════════════ BAKE DATA INTO APP ══════════════════
+// Generates a new index.html with all data embedded — upload to GitHub
+// and the app opens with everything pre-loaded, no uploads needed.
+function bakeData() {
+  var all = getAllData();
+  if (!all.length) { toast('No data loaded. Upload your files first.', 'err'); return; }
+
+  setSessStatus('Generating app with embedded data…');
+
+  // Get the current page HTML
+  var html = document.documentElement.outerHTML;
+
+  // Build the data payload
+  var payload = JSON.stringify({_t:'sfdr6', d:lvlData});
+
+  // 1. Inject pre-loaded data variable before the init function
+  var dataScript = '\n// ══ PRE-LOADED DATA (baked in) ══\nvar BAKED_DATA = ' + payload + ';\n';
+  html = html.replace(
+    '// ══════════════════ INIT ══════════════════',
+    dataScript + '// ══════════════════ INIT ══════════════════'
+  );
+
+  // 2. Replace init to use baked data on startup
+  html = html.replace(
+    "(function init(){\n  TABS.forEach(function(t){renderTab(t);});\n  updateStats();\n  setSessStatus('\uD83D\uDCBE Save session after uploading \u2014 then load it next time');\n})();",
+    "(function init(){\n  if (typeof BAKED_DATA !== 'undefined' && BAKED_DATA && BAKED_DATA.d) {\n    lvlData = BAKED_DATA.d;\n    ['s1','s2','s3','s4'].forEach(updateChip);\n    refreshAll();\n    setSessStatus('Data pre-loaded \u2713 (' + getAllData().length + ' students)');\n    toast('All student data loaded automatically!', 'ok');\n  } else {\n    TABS.forEach(function(t){renderTab(t);});\n    updateStats();\n    setSessStatus('\uD83D\uDCBE Save session after uploading \u2014 then load it next time');\n  }\n})();"
+  );
+
+  // 3. Download the baked HTML as index.html
+  var blob = new Blob([html], {type: 'text/html'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'index.html';
+  a.click();
+
+  setSessStatus('✅ index.html downloaded — upload it to GitHub Pages!');
+  toast('Done! Upload the new index.html to GitHub — data opens automatically.', 'ok');
+}
+
 // ══════════════════ INIT ══════════════════
 (function init(){
-  lsOk=checkLS();
-  var ok=loadLS();
-  if(ok){
-    ['s1','s2','s3','s4'].forEach(updateChip);
-    refreshAll();
-    var cnt=['s1','s2','s3','s4'].filter(function(t){return !!lvlData[t];}).length;
-    toast('Restored '+cnt+' level file'+(cnt!==1?'s':'')+'.','ok');
-    setSessStatus('Auto-saved ✓');
-  } else {
-    TABS.forEach(function(t){renderTab(t);});
-    updateStats();
-    if(!lsOk) setSessStatus('Auto-save unavailable — use 💾 Save session');
-  }
+  TABS.forEach(function(t){renderTab(t);});
+  updateStats();
+  setSessStatus('💾 Save session after uploading — then load it next time');
 })();
 </script>
 </body>
