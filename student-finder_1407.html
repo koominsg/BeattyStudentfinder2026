@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Finder – Beatty Secondary School</title>
+<style>
+:root{
+  --navy:#000080;--yellow:#FFD700;--yellow-dk:#CCAC00;
+  --bg:#F5F6FA;--white:#fff;--border:#E0E2EA;
+  --text:#1A1C2E;--muted:#6B7280;--light:#9CA3AF;
+  --success:#10B981;--r:10px;--rs:6px;
+  --shadow:0 1px 4px rgba(0,0,128,.08),0 4px 16px rgba(0,0,128,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;display:flex;flex-direction:column;min-height:100vh}
+
+/* Header */
+.hdr{background:var(--navy);color:#fff;padding:0 22px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,128,.3);flex-shrink:0}
+.hbrand{display:flex;align-items:center;gap:11px}
+.hicon{width:30px;height:30px;background:var(--yellow);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.htitle{font-size:17px;font-weight:700}.htitle span{color:var(--yellow)}
+.hsub{font-size:10px;color:rgba(255,255,255,.5);margin-top:1px}
+.hbtns{display:flex;gap:7px}
+.hbtn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:var(--rs);font-size:12px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;transition:all .15s}
+.hbtn:disabled{opacity:.4;cursor:not-allowed}
+.hbtn-outline{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35)}
+.hbtn-outline:hover{background:rgba(255,255,255,.12)}
+.hbtn-yellow{background:var(--yellow);color:var(--navy)}
+.hbtn-yellow:hover{background:var(--yellow-dk)}
+
+/* Summary zone */
+.sumzone{background:#fff;border-bottom:1px solid var(--border);padding:11px 22px;display:flex;flex-direction:column;gap:9px;flex-shrink:0}
+.sess-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.sess-lbl{font-size:12px;color:var(--muted);font-weight:500}
+.sess-btn{background:none;border:1px solid var(--border);border-radius:var(--rs);padding:3px 9px;font-size:11px;color:var(--muted);cursor:pointer;font-weight:600;white-space:nowrap;transition:all .15s}
+.sess-btn:hover{background:var(--bg);color:var(--navy)}
+.sess-btn.danger{border-color:#FCA5A5;color:#991B1B}
+.sess-btn.danger:hover{background:#FEF2F2}
+.sess-btn.bake{border-color:#A7F3D0;color:#065F46;font-weight:700}
+.sess-btn.bake:hover{background:#ECFDF5}
+.scards{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.sc{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:9px 12px;display:flex;align-items:center;gap:9px}
+.sc-ico{width:28px;height:28px;border-radius:var(--rs);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.sc:nth-child(1) .sc-ico{background:rgba(0,0,128,.1)}
+.sc:nth-child(2) .sc-ico{background:rgba(255,215,0,.2)}
+.sc:nth-child(3) .sc-ico{background:#EDE9FE}
+.sc:nth-child(4) .sc-ico{background:#E0F2FE}
+.sc:nth-child(5) .sc-ico{background:#D1FAE5}
+.sc-val{font-size:18px;font-weight:700;color:var(--navy);line-height:1}
+.sc-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* Tabs */
+.tabbar{background:#fff;border-bottom:2px solid var(--border);display:flex;padding:0 16px;overflow-x:auto;flex-shrink:0}
+.tbtn{padding:10px 16px;font-size:13px;font-weight:600;color:var(--muted);background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:color .15s,border-color .15s}
+.tbtn:hover{color:var(--navy)}
+.tbtn.active{color:var(--navy);border-bottom-color:var(--navy)}
+.tcnt{background:var(--navy);color:var(--yellow);font-size:10px;font-weight:700;padding:1px 6px;border-radius:100px;min-width:20px;text-align:center}
+.tbtn.active .tcnt{background:var(--yellow);color:var(--navy)}
+.tpage{display:none;flex-direction:column;flex:1;overflow:hidden;min-height:0}
+
+/* Per-level upload strip */
+.lvl-upload-zone{background:#fff;border-bottom:1px solid var(--border);padding:12px 18px;display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.lvl-upload-area{display:flex;align-items:center;gap:12px;border:2px dashed var(--border);border-radius:var(--r);padding:11px 16px;cursor:pointer;background:var(--bg);transition:all .2s}
+.lvl-upload-area:hover,.lvl-upload-area.drag{border-color:var(--navy);background:rgba(0,0,128,.03)}
+.upload-icon{width:34px;height:34px;border-radius:var(--rs);background:rgba(0,0,128,.09);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.upload-title{font-size:13px;font-weight:600;color:var(--navy)}
+.upload-sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* Progress bar */
+.prog-wrap{display:none;flex-direction:column;gap:6px;padding:10px 12px;background:rgba(0,0,128,.04);border:1px solid rgba(0,0,128,.12);border-radius:var(--r)}
+.prog-wrap.show{display:flex}
+.prog-top{display:flex;justify-content:space-between;align-items:center}
+.prog-name{font-size:12px;font-weight:600;color:var(--navy);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prog-pct{font-size:12px;font-weight:700;color:var(--navy);margin-left:8px}
+.prog-track{height:10px;background:rgba(0,0,128,.1);border-radius:5px;overflow:hidden}
+.prog-bar{height:100%;width:0%;border-radius:5px;background:linear-gradient(90deg,var(--navy),#3333cc);transition:width .3s ease}
+.prog-bar.done{background:linear-gradient(90deg,#059669,#10b981)}
+.prog-steps{display:flex;justify-content:space-between}
+.pstep{font-size:10px;color:var(--light)}
+.pstep.active{color:var(--navy);font-weight:700}
+.pstep.done{color:var(--success);font-weight:700}
+.prog-msg{font-size:11px;color:var(--muted)}
+
+/* Loaded file chip */
+.lvl-chip-row{display:flex;align-items:center;gap:10px}
+.lvl-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;background:#EEF2FF;border:1px solid #C7D2FE;border-radius:100px;font-size:12px;font-weight:500;color:#3730A3}
+.chip-ico{font-size:13px}
+.chip-nm{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.chip-cnt{background:#3730A3;color:#fff;font-size:10px;padding:1px 6px;border-radius:100px;font-weight:700}
+.chip-rm{background:none;border:none;cursor:pointer;color:#6366F1;font-size:14px;line-height:1;padding:0;margin-left:2px}
+.chip-rm:hover{color:#dc2626}
+.chip-privacy{font-size:11px;color:var(--light)}
+
+/* Content layout */
+.content{display:flex;flex:1;overflow:hidden;min-height:0}
+
+/* Filter panel */
+.fp{width:196px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);overflow-y:auto;padding:11px;display:flex;flex-direction:column;gap:2px}
+.fp-hdr{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding:3px 0 7px;border-bottom:1px solid var(--border);margin-bottom:4px;display:flex;align-items:center;justify-content:space-between}
+.fbadge{background:var(--navy);color:var(--yellow);font-size:10px;padding:1px 5px;border-radius:100px;margin-left:4px}
+.fg{margin-bottom:5px}
+.fl{font-size:10px;font-weight:700;color:var(--navy);margin-bottom:2px;text-transform:uppercase;letter-spacing:.4px}
+.fsel{width:100%;padding:5px 22px 5px 7px;border:1px solid var(--border);border-radius:var(--rs);font-size:12px;color:var(--text);background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236B7280'/%3E%3C/svg%3E") no-repeat right 6px center;appearance:none;cursor:pointer}
+.fsel:focus{outline:none;border-color:var(--navy)}
+.fa{margin-top:6px;padding-top:7px;border-top:1px solid var(--border)}
+.btn-clr{width:100%;padding:5px;background:transparent;border:1px solid var(--border);border-radius:var(--rs);font-size:12px;color:var(--muted);cursor:pointer;font-weight:500}
+.btn-clr:hover{background:var(--bg)}
+
+/* Results */
+.results{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.rtbar{padding:10px 12px;background:#fff;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:7px;flex-shrink:0}
+.srow{display:flex;gap:7px}
+.swrap{flex:1;position:relative;display:flex;align-items:center}
+.sico{position:absolute;left:9px;font-size:13px;color:var(--muted)}
+.sinput{width:100%;padding:7px 28px 7px 30px;border:1px solid var(--border);border-radius:var(--rs);font-size:13px;background:var(--bg);transition:all .15s}
+.sinput:focus{outline:none;border-color:var(--navy);background:#fff;box-shadow:0 0 0 3px rgba(0,0,128,.08)}
+.sclear{position:absolute;right:8px;background:none;border:none;cursor:pointer;color:var(--muted);display:none;font-size:14px;line-height:1}
+.trow{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.rcnt{font-size:12px;color:var(--muted);font-weight:500}
+.rcnt strong{color:var(--navy)}
+.vtrow{display:flex;align-items:center;gap:7px}
+.vtoggle{display:flex;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden}
+.vbtn{padding:5px 9px;background:var(--bg);border:none;cursor:pointer;color:var(--muted);font-size:14px;transition:all .15s}
+.vbtn.active{background:var(--navy);color:#fff}
+.sortsel{padding:5px 22px 5px 8px;border:1px solid var(--border);border-radius:var(--rs);font-size:12px;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236B7280'/%3E%3C/svg%3E") no-repeat right 7px center;appearance:none;cursor:pointer}
+.sortsel:focus{outline:none;border-color:var(--navy)}
+.rscroll{flex:1;overflow-y:auto;padding:12px}
+
+/* Empty */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;text-align:center;gap:8px}
+.empty-icon{font-size:36px;opacity:.4}
+.empty h3{font-size:14px;font-weight:600;color:var(--navy)}
+.empty p{font-size:12px;color:var(--muted);max-width:240px;line-height:1.5}
+
+/* Cards */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:10px}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;cursor:pointer;transition:all .18s;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px}
+.card:hover{border-color:var(--navy);box-shadow:0 4px 12px rgba(0,0,128,.14);transform:translateY(-1px)}
+.card.sel{border-color:var(--navy);background:rgba(0,0,128,.025);box-shadow:0 0 0 2px var(--navy)}
+.card-hdr{display:flex;gap:8px}
+.avi{width:32px;height:32px;border-radius:50%;background:var(--navy);color:var(--yellow);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0}
+.card-name{font-size:13px;font-weight:600;color:var(--navy)}
+.card-cls{font-size:11px;color:var(--muted);margin-top:1px}
+.badges{display:flex;flex-wrap:wrap;gap:4px}
+.bdg{display:inline-flex;padding:2px 6px;border-radius:100px;font-size:10px;font-weight:600;white-space:nowrap}
+.bsubj{background:#EDE9FE;color:#5B21B6}
+.bstream{background:rgba(255,215,0,.2);color:#78600A}
+.bday{background:#E0F2FE;color:#0369A1}
+.bodd{background:#FEE2E2;color:#991B1B}
+.beven{background:#D1FAE5;color:#065F46}
+.bwk{background:#F3F4F6;color:#374151}
+.card-meta{display:flex;flex-direction:column;gap:3px}
+.cmrow{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.cmrow .ico{font-size:12px}
+.cmrow strong{color:var(--text);font-weight:500}
+
+/* Table */
+.twrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead tr{background:var(--navy);color:#fff;position:sticky;top:0}
+th{padding:8px 10px;text-align:left;font-weight:600;font-size:11px;white-space:nowrap;cursor:pointer;user-select:none}
+th:hover{background:#0000b3}
+th.sa{color:var(--yellow)}
+tbody tr{border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+tbody tr:hover{background:rgba(0,0,128,.03)}
+tbody tr.sel{background:rgba(0,0,128,.06)}
+td{padding:7px 10px;white-space:nowrap}
+td.tn{font-weight:600;color:var(--navy)}
+
+/* Detail panel */
+.dp{width:255px;flex-shrink:0;background:#fff;border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:width .2s}
+.dp.hidden{width:0;overflow:hidden}
+.dp-hdr{background:var(--navy);color:#fff;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.dp-hdr span{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;opacity:.8}
+.dp-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;font-size:16px}
+.dp-close:hover{color:#fff}
+.dp-body{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.dp-empty{display:flex;align-items:center;justify-content:center;flex:1;text-align:center;padding:24px}
+.dp-empty p{font-size:12px;color:var(--muted);line-height:1.5}
+.dp-avrow{display:flex;align-items:center;gap:10px}
+.dp-av{width:40px;height:40px;border-radius:50%;background:var(--navy);color:var(--yellow);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.dp-name{font-size:14px;font-weight:700;color:var(--navy)}
+.dp-cls{font-size:11px;color:var(--muted);margin-top:1px}
+.dp-sec{border-top:1px solid var(--border);padding-top:9px;display:flex;flex-direction:column;gap:7px}
+.dp-st{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted)}
+.dp-f{display:flex;flex-direction:column;gap:2px}
+.dp-fl{font-size:10px;color:var(--light);font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.dp-fv{font-size:12px;color:var(--text);font-weight:500}
+.dp-tr{display:flex;align-items:center;gap:6px}
+.dp-tb{flex:1;background:var(--bg);border-radius:var(--rs);padding:6px 8px;text-align:center}
+.dp-tl{font-size:10px;color:var(--muted)}
+.dp-tv{font-size:13px;font-weight:700;color:var(--navy)}
+.dp-rem{background:#FFF9E6;border-left:3px solid var(--yellow);border-radius:var(--rs);padding:8px 10px;font-size:12px;color:#5C4800;line-height:1.5}
+.dp-rem.e{background:var(--bg);border-color:var(--border);color:var(--muted);font-style:italic}
+
+/* Toast */
+.toasts{position:fixed;bottom:16px;right:16px;z-index:999;display:flex;flex-direction:column;gap:5px;pointer-events:none}
+.toast{padding:9px 13px;border-radius:var(--rs);font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px;box-shadow:0 4px 14px rgba(0,0,0,.18);animation:tsi .2s ease;pointer-events:all;max-width:300px}
+.tok{background:#065F46;color:#fff}.terr{background:#991B1B;color:#fff}
+@keyframes tsi{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
+
+/* All-Students tab */
+.all-upload-hint{padding:10px 18px;background:#FEF9EC;border-bottom:1px solid #FDE68A;font-size:12px;color:#92400E;display:flex;align-items:center;gap:6px;flex-shrink:0}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:3px}
+
+@media(max-width:1100px){.dp{width:220px}.scards{grid-template-columns:repeat(3,1fr)}.sc:nth-child(n+4){display:none}}
+@media(max-width:860px){.fp{width:160px;padding:9px}.dp{display:none}.scards{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:640px){.fp{display:none}.scards{grid-template-columns:repeat(2,1fr)}.cgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="hbrand">
+    <div class="hicon">🔍</div>
+    <div><div class="htitle">Student <span>Finder</span></div><div class="hsub">Beatty Secondary School</div></div>
+  </div>
+  <div class="hbtns">
+    <button class="hbtn hbtn-outline" onclick="loadSample()">📋 Sample Data</button>
+    <button class="hbtn hbtn-yellow" id="exportBtn" onclick="doExport()" disabled>⬇ Export</button>
+  </div>
+</header>
+
+<div class="sumzone">
+  <div class="sess-row">
+    <span class="sess-lbl">Session:</span>
+    <button class="sess-btn" onclick="saveSession()">💾 Save session</button>
+    <button class="sess-btn" onclick="document.getElementById('sfi').click()">📂 Load session</button>
+    <input type="file" id="sfi" accept=".json" onchange="loadSession(event)" style="display:none">
+    <button class="sess-btn bake" onclick="bakeData()" title="Embed data into app — upload to GitHub for instant loading">⚡ Bake data into app</button>
+    <button class="sess-btn danger" onclick="clearAll()">🗑 Clear all</button>
+    <span id="sess-status" style="font-size:11px;color:var(--muted);margin-left:4px"></span>
+  </div>
+  <div class="scards">
+    <div class="sc"><div class="sc-ico">👥</div><div><div class="sc-val" id="st-total">—</div><div class="sc-lbl">Total Students</div></div></div>
+    <div class="sc"><div class="sc-ico">🏫</div><div><div class="sc-val" id="st-cls">—</div><div class="sc-lbl">Form Classes</div></div></div>
+    <div class="sc"><div class="sc-ico">📚</div><div><div class="sc-val" id="st-subj">—</div><div class="sc-lbl">Subjects</div></div></div>
+    <div class="sc"><div class="sc-ico">👩‍🏫</div><div><div class="sc-val" id="st-tch">—</div><div class="sc-lbl">Teachers</div></div></div>
+    <div class="sc"><div class="sc-ico">✅</div><div><div class="sc-val" id="st-show">—</div><div class="sc-lbl">Showing</div></div></div>
+  </div>
+</div>
+<div class="tabbar">
+  <button class="tbtn active" id="tb-all" onclick="switchTab('all')">All Students<span class="tcnt" id="tc-all">—</span></button>
+  <button class="tbtn" id="tb-s1" onclick="switchTab('s1')">Sec 1<span class="tcnt" id="tc-s1">—</span></button><button class="tbtn" id="tb-s2" onclick="switchTab('s2')">Sec 2<span class="tcnt" id="tc-s2">—</span></button><button class="tbtn" id="tb-s3" onclick="switchTab('s3')">Sec 3<span class="tcnt" id="tc-s3">—</span></button><button class="tbtn" id="tb-s4" onclick="switchTab('s4')">Sec 4<span class="tcnt" id="tc-s4">—</span></button>
+</div>
+<div class="tpage" id="tp-all" style="display:flex">
+  <div class="all-upload-hint">ℹ️ Upload files in each level tab (Sec 1, Sec 2, Sec 3, Sec 4) — all data appears here combined.</div>
+  <div class="content">
+    <div class="fp">
+  <div class="fp-hdr">Filters<span class="fbadge" id="fb-all" style="display:none"></span></div>
+  <div class="fg"><div class="fl">Level</div><select class="fsel" id="f-all-level" onchange="doApply('all')"><option value="">All Levels</option></select></div>
+<div class="fg"><div class="fl">Form Class</div><select class="fsel" id="f-all-formClass" onchange="doApply('all')"><option value="">All Classes</option></select></div>
+<div class="fg"><div class="fl">Subject</div><select class="fsel" id="f-all-subject" onchange="doApply('all')"><option value="">All Subjects</option></select></div>
+<div class="fg"><div class="fl">Stream</div><select class="fsel" id="f-all-stream" onchange="doApply('all')"><option value="">All Streams</option></select></div>
+<div class="fg"><div class="fl">Teacher</div><select class="fsel" id="f-all-subjectTeacher" onchange="doApply('all')"><option value="">All Teachers</option></select></div>
+<div class="fg"><div class="fl">Day</div><select class="fsel" id="f-all-day" onchange="doApply('all')"><option value="">All Days</option></select></div>
+<div class="fg"><div class="fl">Week</div>
+<select class="fsel" id="f-all-week" onchange="doApply('all')">
+<option value="">All Weeks</option><option value="Odd">Odd Week</option><option value="Even">Even Week</option>
+</select></div>
+<div class="fg"><div class="fl">Start Time</div><select class="fsel" id="f-all-startTime" onchange="doApply('all')"><option value="">All Start Times</option></select></div>
+<div class="fg"><div class="fl">End Time</div><select class="fsel" id="f-all-endTime" onchange="doApply('all')"><option value="">All End Times</option></select></div>
+<div class="fg"><div class="fl">Venue</div><select class="fsel" id="f-all-venue" onchange="doApply('all')"><option value="">All Venues</option></select></div>
+  <div class="fa"><button class="btn-clr" onclick="clrFilters('all')">✕ Clear</button></div>
+</div>
+    <div class="results">
+      <div class="rtbar">
+  <div class="srow"><div class="swrap">
+    <span class="sico">🔍</span>
+    <input class="sinput" id="si-all" placeholder="Search all students by name, class, subject, teacher…" oninput="onSearch('all',this)">
+    <button class="sclear" id="sc-all" onclick="clrSearch('all')">✕</button>
+  </div></div>
+  <div class="trow">
+    <div class="rcnt" id="rc-all">—</div>
+    <div class="vtrow">
+      <select class="sortsel" id="ss-all" onchange="doApply('all')">
+        <option value="">Sort by…</option>
+        <option value="studentName">Name</option><option value="formClass">Class</option>
+        <option value="subject">Subject</option><option value="subjectTeacher">Teacher</option>
+        <option value="day">Day</option><option value="startTime">Start Time</option>
+        <option value="venue">Venue</option>
+      </select>
+      <div class="vtoggle">
+        <button class="vbtn active" id="vc-all" onclick="setView('all','card')" title="Cards">⊞</button>
+        <button class="vbtn" id="vt-all" onclick="setView('all','table')" title="Table">≡</button>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="rscroll" id="rs-all">
+        <div class="empty" id="em-all">
+          <div class="empty-icon">📂</div>
+          <h3>No data loaded yet</h3>
+          <p>Go to the Sec 1, Sec 2, Sec 3 or Sec 4 tabs above and upload each level's deployment file.</p>
+        </div>
+        <div id="cg-all" class="cgrid" style="display:none"></div>
+        <div id="tbl-all" style="display:none"></div>
+      </div>
+    </div>
+    <div class="dp hidden" id="dp-all">
+  <div class="dp-hdr"><span>Student Details</span><button class="dp-close" onclick="closeDP('all')">✕</button></div>
+  <div class="dp-body" id="dpb-all"><div class="dp-empty"><p>Click a student card to view details.</p></div></div>
+</div>
+  </div>
+</div>
+<div class="tpage" id="tp-s1" style="display:none">
+  <!-- Upload strip at top of tab -->
+  <div class="lvl-upload-zone" id="uz-s1">
+  <div class="lvl-upload-area" id="ua-s1"
+       onclick="document.getElementById('fi-s1').click()"
+       ondragover="dov(event,'s1')" ondragleave="dlv('s1')" ondrop="ddr(event,'s1')">
+    <div class="upload-icon">📁</div>
+    <div>
+      <div class="upload-title">Upload Sec 1 Deployment File</div>
+      <div class="upload-sub">CSV or Excel (.xlsx/.xls) — drag &amp; drop or click to browse</div>
+    </div>
+  </div>
+  <input type="file" id="fi-s1" accept=".csv,.xlsx,.xls" onchange="onFile(event,'s1')" style="display:none">
+
+  <!-- Progress bar for this tab -->
+  <div class="prog-wrap" id="pw-s1">
+    <div class="prog-top"><span class="prog-name" id="pn-s1">—</span><span class="prog-pct" id="pp-s1">0%</span></div>
+    <div class="prog-track"><div class="prog-bar" id="pb-s1"></div></div>
+    <div class="prog-steps">
+      <span class="pstep" id="ps-s1-0">📖 Reading</span>
+      <span class="pstep" id="ps-s1-1">⚙ Parsing</span>
+      <span class="pstep" id="ps-s1-2">🔄 Processing</span>
+      <span class="pstep" id="ps-s1-3">✅ Done</span>
+    </div>
+    <div class="prog-msg" id="pm-s1">Preparing…</div>
+  </div>
+
+  <!-- Loaded file chip -->
+  <div class="lvl-chip-row" id="cr-s1" style="display:none">
+    <div class="lvl-chip">
+      <span class="chip-ico">📄</span>
+      <span class="chip-nm" id="cn-s1">—</span>
+      <span class="chip-cnt" id="cc-s1">0</span>
+      <button class="chip-rm" onclick="removeLvlFile('s1')" title="Remove this file">✕</button>
+    </div>
+    <span class="chip-privacy">🔒 Stored locally only</span>
+  </div>
+</div>
+  <!-- Main content -->
+  <div class="content">
+    <div class="fp">
+  <div class="fp-hdr">Filters<span class="fbadge" id="fb-s1" style="display:none"></span></div>
+  <div class="fg"><div class="fl">Form Class</div><select class="fsel" id="f-s1-formClass" onchange="doApply('s1')"><option value="">All Classes</option></select></div>
+<div class="fg"><div class="fl">Subject</div><select class="fsel" id="f-s1-subject" onchange="doApply('s1')"><option value="">All Subjects</option></select></div>
+<div class="fg"><div class="fl">Stream</div><select class="fsel" id="f-s1-stream" onchange="doApply('s1')"><option value="">All Streams</option></select></div>
+<div class="fg"><div class="fl">Teacher</div><select class="fsel" id="f-s1-subjectTeacher" onchange="doApply('s1')"><option value="">All Teachers</option></select></div>
+<div class="fg"><div class="fl">Day</div><select class="fsel" id="f-s1-day" onchange="doApply('s1')"><option value="">All Days</option></select></div>
+<div class="fg"><div class="fl">Week</div>
+<select class="fsel" id="f-s1-week" onchange="doApply('s1')">
+<option value="">All Weeks</option><option value="Odd">Odd Week</option><option value="Even">Even Week</option>
+</select></div>
+<div class="fg"><div class="fl">Start Time</div><select class="fsel" id="f-s1-startTime" onchange="doApply('s1')"><option value="">All Start Times</option></select></div>
+<div class="fg"><div class="fl">End Time</div><select class="fsel" id="f-s1-endTime" onchange="doApply('s1')"><option value="">All End Times</option></select></div>
+<div class="fg"><div class="fl">Venue</div><select class="fsel" id="f-s1-venue" onchange="doApply('s1')"><option value="">All Venues</option></select></div>
+  <div class="fa"><button class="btn-clr" onclick="clrFilters('s1')">✕ Clear</button></div>
+</div>
+    <div class="results">
+      <div class="rtbar">
+  <div class="srow"><div class="swrap">
+    <span class="sico">🔍</span>
+    <input class="sinput" id="si-s1" placeholder="Search Sec 1 students…" oninput="onSearch('s1',this)">
+    <button class="sclear" id="sc-s1" onclick="clrSearch('s1')">✕</button>
+  </div></div>
+  <div class="trow">
+    <div class="rcnt" id="rc-s1">—</div>
+    <div class="vtrow">
+      <select class="sortsel" id="ss-s1" onchange="doApply('s1')">
+        <option value="">Sort by…</option>
+        <option value="studentName">Name</option><option value="formClass">Class</option>
+        <option value="subject">Subject</option><option value="subjectTeacher">Teacher</option>
+        <option value="day">Day</option><option value="startTime">Start Time</option>
+        <option value="venue">Venue</option>
+      </select>
+      <div class="vtoggle">
+        <button class="vbtn active" id="vc-s1" onclick="setView('s1','card')" title="Cards">⊞</button>
+        <button class="vbtn" id="vt-s1" onclick="setView('s1','table')" title="Table">≡</button>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="rscroll" id="rs-s1">
+        <div class="empty" id="em-s1">
+          <div class="empty-icon">📋</div>
+          <h3>No Sec 1 data loaded</h3>
+          <p>Upload a Sec 1 deployment file above to see students here.</p>
+        </div>
+        <div id="cg-s1" class="cgrid" style="display:none"></div>
+        <div id="tbl-s1" style="display:none"></div>
+      </div>
+    </div>
+    <div class="dp hidden" id="dp-s1">
+  <div class="dp-hdr"><span>Student Details</span><button class="dp-close" onclick="closeDP('s1')">✕</button></div>
+  <div class="dp-body" id="dpb-s1"><div class="dp-empty"><p>Click a student card to view details.</p></div></div>
+</div>
+  </div>
+</div>
+<div class="tpage" id="tp-s2" style="display:none">
+  <!-- Upload strip at top of tab -->
+  <div class="lvl-upload-zone" id="uz-s2">
+  <div class="lvl-upload-area" id="ua-s2"
+       onclick="document.getElementById('fi-s2').click()"
+       ondragover="dov(event,'s2')" ondragleave="dlv('s2')" ondrop="ddr(event,'s2')">
+    <div class="upload-icon">📁</div>
+    <div>
+      <div class="upload-title">Upload Sec 2 Deployment File</div>
+      <div class="upload-sub">CSV or Excel (.xlsx/.xls) — drag &amp; drop or click to browse</div>
+    </div>
+  </div>
+  <input type="file" id="fi-s2" accept=".csv,.xlsx,.xls" onchange="onFile(event,'s2')" style="display:none">
+
+  <!-- Progress bar for this tab -->
+  <div class="prog-wrap" id="pw-s2">
+    <div class="prog-top"><span class="prog-name" id="pn-s2">—</span><span class="prog-pct" id="pp-s2">0%</span></div>
+    <div class="prog-track"><div class="prog-bar" id="pb-s2"></div></div>
+    <div class="prog-steps">
+      <span class="pstep" id="ps-s2-0">📖 Reading</span>
+      <span class="pstep" id="ps-s2-1">⚙ Parsing</span>
+      <span class="pstep" id="ps-s2-2">🔄 Processing</span>
+      <span class="pstep" id="ps-s2-3">✅ Done</span>
+    </div>
+    <div class="prog-msg" id="pm-s2">Preparing…</div>
+  </div>
+
+  <!-- Loaded file chip -->
+  <div class="lvl-chip-row" id="cr-s2" style="display:none">
+    <div class="lvl-chip">
+      <span class="chip-ico">📄</span>
+      <span class="chip-nm" id="cn-s2">—</span>
+      <span class="chip-cnt" id="cc-s2">0</span>
+      <button class="chip-rm" onclick="removeLvlFile('s2')" title="Remove this file">✕</button>
+    </div>
+    <span class="chip-privacy">🔒 Stored locally only</span>
+  </div>
+</div>
+  <!-- Main content -->
+  <div class="content">
+    <div class="fp">
+  <div class="fp-hdr">Filters<span class="fbadge" id="fb-s2" style="display:none"></span></div>
+  <div class="fg"><div class="fl">Form Class</div><select class="fsel" id="f-s2-formClass" onchange="doApply('s2')"><option value="">All Classes</option></select></div>
+<div class="fg"><div class="fl">Subject</div><select class="fsel" id="f-s2-subject" onchange="doApply('s2')"><option value="">All Subjects</option></select></div>
+<div class="fg"><div class="fl">Stream</div><select class="fsel" id="f-s2-stream" onchange="doApply('s2')"><option value="">All Streams</option></select></div>
+<div class="fg"><div class="fl">Teacher</div><select class="fsel" id="f-s2-subjectTeacher" onchange="doApply('s2')"><option value="">All Teachers</option></select></div>
+<div class="fg"><div class="fl">Day</div><select class="fsel" id="f-s2-day" onchange="doApply('s2')"><option value="">All Days</option></select></div>
+<div class="fg"><div class="fl">Week</div>
+<select class="fsel" id="f-s2-week" onchange="doApply('s2')">
+<option value="">All Weeks</option><option value="Odd">Odd Week</option><option value="Even">Even Week</option>
+</select></div>
+<div class="fg"><div class="fl">Start Time</div><select class="fsel" id="f-s2-startTime" onchange="doApply('s2')"><option value="">All Start Times</option></select></div>
+<div class="fg"><div class="fl">End Time</div><select class="fsel" id="f-s2-endTime" onchange="doApply('s2')"><option value="">All End Times</option></select></div>
+<div class="fg"><div class="fl">Venue</div><select class="fsel" id="f-s2-venue" onchange="doApply('s2')"><option value="">All Venues</option></select></div>
+  <div class="fa"><button class="btn-clr" onclick="clrFilters('s2')">✕ Clear</button></div>
+</div>
+    <div class="results">
+      <div class="rtbar">
+  <div class="srow"><div class="swrap">
+    <span class="sico">🔍</span>
+    <input class="sinput" id="si-s2" placeholder="Search Sec 2 students…" oninput="onSearch('s2',this)">
+    <button class="sclear" id="sc-s2" onclick="clrSearch('s2')">✕</button>
+  </div></div>
+  <div class="trow">
+    <div class="rcnt" id="rc-s2">—</div>
+    <div class="vtrow">
+      <select class="sortsel" id="ss-s2" onchange="doApply('s2')">
+        <option value="">Sort by…</option>
+        <option value="studentName">Name</option><option value="formClass">Class</option>
+        <option value="subject">Subject</option><option value="subjectTeacher">Teacher</option>
+        <option value="day">Day</option><option value="startTime">Start Time</option>
+        <option value="venue">Venue</option>
+      </select>
+      <div class="vtoggle">
+        <button class="vbtn active" id="vc-s2" onclick="setView('s2','card')" title="Cards">⊞</button>
+        <button class="vbtn" id="vt-s2" onclick="setView('s2','table')" title="Table">≡</button>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="rscroll" id="rs-s2">
+        <div class="empty" id="em-s2">
+          <div class="empty-icon">📋</div>
+          <h3>No Sec 2 data loaded</h3>
+          <p>Upload a Sec 2 deployment file above to see students here.</p>
+        </div>
+        <div id="cg-s2" class="cgrid" style="display:none"></div>
+        <div id="tbl-s2" style="display:none"></div>
+      </div>
+    </div>
+    <div class="dp hidden" id="dp-s2">
+  <div class="dp-hdr"><span>Student Details</span><button class="dp-close" onclick="closeDP('s2')">✕</button></div>
+  <div class="dp-body" id="dpb-s2"><div class="dp-empty"><p>Click a student card to view details.</p></div></div>
+</div>
+  </div>
+</div>
+<div class="tpage" id="tp-s3" style="display:none">
+  <!-- Upload strip at top of tab -->
+  <div class="lvl-upload-zone" id="uz-s3">
+  <div class="lvl-upload-area" id="ua-s3"
+       onclick="document.getElementById('fi-s3').click()"
+       ondragover="dov(event,'s3')" ondragleave="dlv('s3')" ondrop="ddr(event,'s3')">
+    <div class="upload-icon">📁</div>
+    <div>
+      <div class="upload-title">Upload Sec 3 Deployment File</div>
+      <div class="upload-sub">CSV or Excel (.xlsx/.xls) — drag &amp; drop or click to browse</div>
+    </div>
+  </div>
+  <input type="file" id="fi-s3" accept=".csv,.xlsx,.xls" onchange="onFile(event,'s3')" style="display:none">
+
+  <!-- Progress bar for this tab -->
+  <div class="prog-wrap" id="pw-s3">
+    <div class="prog-top"><span class="prog-name" id="pn-s3">—</span><span class="prog-pct" id="pp-s3">0%</span></div>
+    <div class="prog-track"><div class="prog-bar" id="pb-s3"></div></div>
+    <div class="prog-steps">
+      <span class="pstep" id="ps-s3-0">📖 Reading</span>
+      <span class="pstep" id="ps-s3-1">⚙ Parsing</span>
+      <span class="pstep" id="ps-s3-2">🔄 Processing</span>
+      <span class="pstep" id="ps-s3-3">✅ Done</span>
+    </div>
+    <div class="prog-msg" id="pm-s3">Preparing…</div>
+  </div>
+
+  <!-- Loaded file chip -->
+  <div class="lvl-chip-row" id="cr-s3" style="display:none">
+    <div class="lvl-chip">
+      <span class="chip-ico">📄</span>
+      <span class="chip-nm" id="cn-s3">—</span>
+      <span class="chip-cnt" id="cc-s3">0</span>
+      <button class="chip-rm" onclick="removeLvlFile('s3')" title="Remove this file">✕</button>
+    </div>
+    <span class="chip-privacy">🔒 Stored locally only</span>
+  </div>
+</div>
+  <!-- Main content -->
+  <div class="content">
+    <div class="fp">
+  <div class="fp-hdr">Filters<span class="fbadge" id="fb-s3" style="display:none"></span></div>
+  <div class="fg"><div class="fl">Form Class</div><select class="fsel" id="f-s3-formClass" onchange="doApply('s3')"><option value="">All Classes</option></select></div>
+<div class="fg"><div class="fl">Subject</div><select class="fsel" id="f-s3-subject" onchange="doApply('s3')"><option value="">All Subjects</option></select></div>
+<div class="fg"><div class="fl">Stream</div><select class="fsel" id="f-s3-stream" onchange="doApply('s3')"><option value="">All Streams</option></select></div>
+<div class="fg"><div class="fl">Teacher</div><select class="fsel" id="f-s3-subjectTeacher" onchange="doApply('s3')"><option value="">All Teachers</option></select></div>
+<div class="fg"><div class="fl">Day</div><select class="fsel" id="f-s3-day" onchange="doApply('s3')"><option value="">All Days</option></select></div>
+<div class="fg"><div class="fl">Week</div>
+<select class="fsel" id="f-s3-week" onchange="doApply('s3')">
+<option value="">All Weeks</option><option value="Odd">Odd Week</option><option value="Even">Even Week</option>
+</select></div>
+<div class="fg"><div class="fl">Start Time</div><select class="fsel" id="f-s3-startTime" onchange="doApply('s3')"><option value="">All Start Times</option></select></div>
+<div class="fg"><div class="fl">End Time</div><select class="fsel" id="f-s3-endTime" onchange="doApply('s3')"><option value="">All End Times</option></select></div>
+<div class="fg"><div class="fl">Venue</div><select class="fsel" id="f-s3-venue" onchange="doApply('s3')"><option value="">All Venues</option></select></div>
+  <div class="fa"><button class="btn-clr" onclick="clrFilters('s3')">✕ Clear</button></div>
+</div>
+    <div class="results">
+      <div class="rtbar">
+  <div class="srow"><div class="swrap">
+    <span class="sico">🔍</span>
+    <input class="sinput" id="si-s3" placeholder="Search Sec 3 students…" oninput="onSearch('s3',this)">
+    <button class="sclear" id="sc-s3" onclick="clrSearch('s3')">✕</button>
+  </div></div>
+  <div class="trow">
+    <div class="rcnt" id="rc-s3">—</div>
+    <div class="vtrow">
+      <select class="sortsel" id="ss-s3" onchange="doApply('s3')">
+        <option value="">Sort by…</option>
+        <option value="studentName">Name</option><option value="formClass">Class</option>
+        <option value="subject">Subject</option><option value="subjectTeacher">Teacher</option>
+        <option value="day">Day</option><option value="startTime">Start Time</option>
+        <option value="venue">Venue</option>
+      </select>
+      <div class="vtoggle">
+        <button class="vbtn active" id="vc-s3" onclick="setView('s3','card')" title="Cards">⊞</button>
+        <button class="vbtn" id="vt-s3" onclick="setView('s3','table')" title="Table">≡</button>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="rscroll" id="rs-s3">
+        <div class="empty" id="em-s3">
+          <div class="empty-icon">📋</div>
+          <h3>No Sec 3 data loaded</h3>
+          <p>Upload a Sec 3 deployment file above to see students here.</p>
+        </div>
+        <div id="cg-s3" class="cgrid" style="display:none"></div>
+        <div id="tbl-s3" style="display:none"></div>
+      </div>
+    </div>
+    <div class="dp hidden" id="dp-s3">
+  <div class="dp-hdr"><span>Student Details</span><button class="dp-close" onclick="closeDP('s3')">✕</button></div>
+  <div class="dp-body" id="dpb-s3"><div class="dp-empty"><p>Click a student card to view details.</p></div></div>
+</div>
+  </div>
+</div>
+<div class="tpage" id="tp-s4" style="display:none">
+  <!-- Upload strip at top of tab -->
+  <div class="lvl-upload-zone" id="uz-s4">
+  <div class="lvl-upload-area" id="ua-s4"
+       onclick="document.getElementById('fi-s4').click()"
+       ondragover="dov(event,'s4')" ondragleave="dlv('s4')" ondrop="ddr(event,'s4')">
+    <div class="upload-icon">📁</div>
+    <div>
+      <div class="upload-title">Upload Sec 4 Deployment File</div>
+      <div class="upload-sub">CSV or Excel (.xlsx/.xls) — drag &amp; drop or click to browse</div>
+    </div>
+  </div>
+  <input type="file" id="fi-s4" accept=".csv,.xlsx,.xls" onchange="onFile(event,'s4')" style="display:none">
+
+  <!-- Progress bar for this tab -->
+  <div class="prog-wrap" id="pw-s4">
+    <div class="prog-top"><span class="prog-name" id="pn-s4">—</span><span class="prog-pct" id="pp-s4">0%</span></div>
+    <div class="prog-track"><div class="prog-bar" id="pb-s4"></div></div>
+    <div class="prog-steps">
+      <span class="pstep" id="ps-s4-0">📖 Reading</span>
+      <span class="pstep" id="ps-s4-1">⚙ Parsing</span>
+      <span class="pstep" id="ps-s4-2">🔄 Processing</span>
+      <span class="pstep" id="ps-s4-3">✅ Done</span>
+    </div>
+    <div class="prog-msg" id="pm-s4">Preparing…</div>
+  </div>
+
+  <!-- Loaded file chip -->
+  <div class="lvl-chip-row" id="cr-s4" style="display:none">
+    <div class="lvl-chip">
+      <span class="chip-ico">📄</span>
+      <span class="chip-nm" id="cn-s4">—</span>
+      <span class="chip-cnt" id="cc-s4">0</span>
+      <button class="chip-rm" onclick="removeLvlFile('s4')" title="Remove this file">✕</button>
+    </div>
+    <span class="chip-privacy">🔒 Stored locally only</span>
+  </div>
+</div>
+  <!-- Main content -->
+  <div class="content">
+    <div class="fp">
+  <div class="fp-hdr">Filters<span class="fbadge" id="fb-s4" style="display:none"></span></div>
+  <div class="fg"><div class="fl">Form Class</div><select class="fsel" id="f-s4-formClass" onchange="doApply('s4')"><option value="">All Classes</option></select></div>
+<div class="fg"><div class="fl">Subject</div><select class="fsel" id="f-s4-subject" onchange="doApply('s4')"><option value="">All Subjects</option></select></div>
+<div class="fg"><div class="fl">Stream</div><select class="fsel" id="f-s4-stream" onchange="doApply('s4')"><option value="">All Streams</option></select></div>
+<div class="fg"><div class="fl">Teacher</div><select class="fsel" id="f-s4-subjectTeacher" onchange="doApply('s4')"><option value="">All Teachers</option></select></div>
+<div class="fg"><div class="fl">Day</div><select class="fsel" id="f-s4-day" onchange="doApply('s4')"><option value="">All Days</option></select></div>
+<div class="fg"><div class="fl">Week</div>
+<select class="fsel" id="f-s4-week" onchange="doApply('s4')">
+<option value="">All Weeks</option><option value="Odd">Odd Week</option><option value="Even">Even Week</option>
+</select></div>
+<div class="fg"><div class="fl">Start Time</div><select class="fsel" id="f-s4-startTime" onchange="doApply('s4')"><option value="">All Start Times</option></select></div>
+<div class="fg"><div class="fl">End Time</div><select class="fsel" id="f-s4-endTime" onchange="doApply('s4')"><option value="">All End Times</option></select></div>
+<div class="fg"><div class="fl">Venue</div><select class="fsel" id="f-s4-venue" onchange="doApply('s4')"><option value="">All Venues</option></select></div>
+  <div class="fa"><button class="btn-clr" onclick="clrFilters('s4')">✕ Clear</button></div>
+</div>
+    <div class="results">
+      <div class="rtbar">
+  <div class="srow"><div class="swrap">
+    <span class="sico">🔍</span>
+    <input class="sinput" id="si-s4" placeholder="Search Sec 4 students…" oninput="onSearch('s4',this)">
+    <button class="sclear" id="sc-s4" onclick="clrSearch('s4')">✕</button>
+  </div></div>
+  <div class="trow">
+    <div class="rcnt" id="rc-s4">—</div>
+    <div class="vtrow">
+      <select class="sortsel" id="ss-s4" onchange="doApply('s4')">
+        <option value="">Sort by…</option>
+        <option value="studentName">Name</option><option value="formClass">Class</option>
+        <option value="subject">Subject</option><option value="subjectTeacher">Teacher</option>
+        <option value="day">Day</option><option value="startTime">Start Time</option>
+        <option value="venue">Venue</option>
+      </select>
+      <div class="vtoggle">
+        <button class="vbtn active" id="vc-s4" onclick="setView('s4','card')" title="Cards">⊞</button>
+        <button class="vbtn" id="vt-s4" onclick="setView('s4','table')" title="Table">≡</button>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="rscroll" id="rs-s4">
+        <div class="empty" id="em-s4">
+          <div class="empty-icon">📋</div>
+          <h3>No Sec 4 data loaded</h3>
+          <p>Upload a Sec 4 deployment file above to see students here.</p>
+        </div>
+        <div id="cg-s4" class="cgrid" style="display:none"></div>
+        <div id="tbl-s4" style="display:none"></div>
+      </div>
+    </div>
+    <div class="dp hidden" id="dp-s4">
+  <div class="dp-hdr"><span>Student Details</span><button class="dp-close" onclick="closeDP('s4')">✕</button></div>
+  <div class="dp-body" id="dpb-s4"><div class="dp-empty"><p>Click a student card to view details.</p></div></div>
+</div>
+  </div>
+</div>
+<div class="toasts" id="toasts"></div>
+<script>
+// ══════════════════ XLSX LIBRARY ══════════════════
+(function() {
+  function tryLoad(url, fallback) {
+    var s = document.createElement('script');
+    s.onload = function() { window._xlsxOk = true; };
+    s.onerror = function() { if (fallback) fallback(); };
+    s.src = url;
+    document.head.appendChild(s);
+  }
+  tryLoad('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js', function() {
+    tryLoad('https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js', function() {
+      tryLoad('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js', null);
+    });
+  });
+})();
+
+// ══════════════════ STATE ══════════════════
+var TABS      = ['all','s1','s2','s3','s4'];
+var LVL_MAP   = {s1:'Sec 1',s2:'Sec 2',s3:'Sec 3',s4:'Sec 4'};
+var DAY_ORDER = {monday:0,tuesday:1,wednesday:2,thursday:3,friday:4,saturday:5,sunday:6};
+var REQUIRED  = ['studentName','formClass','level','subject','stream','subjectTeacher','day','startTime','endTime','venue'];
+var ALL_FKEYS = ['level','formClass','subject','stream','subjectTeacher','day','week','startTime','endTime','venue'];
+var LVL_FKEYS = ['formClass','subject','stream','subjectTeacher','day','week','startTime','endTime','venue'];
+
+// One file per level tab: {s1:{rows,name,label}, s2:...}
+var lvlData = {s1:null, s2:null, s3:null, s4:null};
+var curTab  = 'all';
+var tState  = {};
+TABS.forEach(function(t) { tState[t] = {filtered:[],selected:null,view:'card',sort:''}; });
+
+function getAllData() {
+  var out = [];
+  ['s1','s2','s3','s4'].forEach(function(t) {
+    if (lvlData[t]) out = out.concat(lvlData[t].rows);
+  });
+  return out;
+}
+
+// ══════════════════ PROGRESS BAR (per tab) ══════════════════
+var _progTimer = {};
+
+function progShow(tid, fname) {
+  if (_progTimer[tid]) { clearTimeout(_progTimer[tid]); _progTimer[tid] = null; }
+  var w=gid('pw-'+tid), n=gid('pn-'+tid), b=gid('pb-'+tid);
+  if (!w) return;
+  if (n) n.textContent = fname;
+  if (b) { b.style.width='5%'; b.className='prog-bar'; }
+  w.className = 'prog-wrap show';
+  progStep(tid,0); progMsg(tid,'Preparing…');
+}
+
+function progSet(tid, pct, msg, step) {
+  var b=gid('pb-'+tid), p=gid('pp-'+tid);
+  if (b) b.style.width=pct+'%';
+  if (p) p.textContent=pct+'%';
+  progMsg(tid,msg);
+  progStep(tid,step);
+}
+
+function progMsg(tid, msg) { var m=gid('pm-'+tid); if(m) m.textContent=msg; }
+
+function progStep(tid, n) {
+  for (var i=0;i<4;i++) {
+    var el=gid('ps-'+tid+'-'+i); if(!el) continue;
+    el.className='pstep'+(i<n?' done':i===n?' active':'');
+  }
+}
+
+function progDone(tid) {
+  var b=gid('pb-'+tid);
+  if (b) { b.style.width='100%'; b.className='prog-bar done'; }
+  var p=gid('pp-'+tid); if(p) p.textContent='100%';
+  progMsg(tid,'Done! ✓'); progStep(tid,4);
+  _progTimer[tid] = setTimeout(function() {
+    var w=gid('pw-'+tid); if(w) w.className='prog-wrap';
+    var b2=gid('pb-'+tid); if(b2){b2.style.width='0%';b2.className='prog-bar';}
+    var p2=gid('pp-'+tid); if(p2) p2.textContent='0%';
+    progStep(tid,0);
+  }, 1500);
+}
+
+function progHide(tid) { var w=gid('pw-'+tid); if(w) w.className='prog-wrap'; }
+
+// ══════════════════ FILE HANDLING ══════════════════
+function onFile(e, tid) {
+  var f = e.target.files[0]; if (f) handleFile(f, tid); e.target.value='';
+}
+function dov(e, tid) { e.preventDefault(); var ua=gid('ua-'+tid); if(ua) ua.classList.add('drag'); }
+function dlv(tid) { var ua=gid('ua-'+tid); if(ua) ua.classList.remove('drag'); }
+function ddr(e, tid) {
+  e.preventDefault(); dlv(tid);
+  var f=e.dataTransfer.files[0]; if(f) handleFile(f,tid);
+}
+
+// ══════════════════ FILE HANDLING ══════════════════
+function onFile(e, tid) {
+  var f = e.target.files[0]; if (f) handleFile(f, tid); e.target.value='';
+}
+function dov(e, tid) { e.preventDefault(); var ua=gid('ua-'+tid); if(ua) ua.classList.add('drag'); }
+function dlv(tid) { var ua=gid('ua-'+tid); if(ua) ua.classList.remove('drag'); }
+function ddr(e, tid) {
+  e.preventDefault(); dlv(tid);
+  var f=e.dataTransfer.files[0]; if(f) handleFile(f,tid);
+}
+
+function handleFile(file, tid) {
+  var name  = file.name;
+  var lower = name.toLowerCase();
+  var isCSV = lower.endsWith('.csv');
+  var isXL  = lower.endsWith('.xlsx') || lower.endsWith('.xls');
+
+  if (!isCSV && !isXL) { toast(name+': please upload CSV or Excel.','err'); return; }
+
+  // Show progress bar, then immediately start reading (one rAF so bar renders first)
+  progShow(tid, name);
+  progSet(tid, 10, 'Reading file…', 0);
+
+  requestAnimationFrame(function() {
+    var reader = new FileReader();
+
+    reader.onprogress = function(ev) {
+      if (ev.lengthComputable) {
+        var pct = 10 + Math.round(ev.loaded / ev.total * 25);
+        progSet(tid, pct, 'Reading… ' + Math.round(ev.loaded/ev.total*100) + '%', 0);
+      }
+    };
+
+    reader.onerror = function() {
+      progHide(tid);
+      toast('Could not read: ' + name, 'err');
+    };
+
+    reader.onload = function(ev) {
+      // File is now in memory — parse immediately (synchronous, fast)
+      progSet(tid, 40, 'Parsing…', 1);
+      if (isCSV) parseCSV(ev.target.result, name, tid);
+      else       parseXL(ev.target.result, name, tid);
+    };
+
+    if (isCSV) reader.readAsText(file);
+    else       reader.readAsArrayBuffer(file);
+  });
+}
+
+// ── CSV — fully synchronous ──
+function parseCSV(text, fname, tid) {
+  try {
+    var lines = text.trim().split(/\r?\n/);
+    if (lines.length < 2) { progHide(tid); toast(fname+': file is empty.','err'); return; }
+
+    var rawHdr = lines[0].split(',').map(function(h) {
+      return h.trim().replace(/^[\uFEFF"]+|"+$/g,'');
+    });
+    var miss = checkHdrs(rawHdr);
+    if (miss.length) { progHide(tid); toast(fname+': missing columns — '+miss.join(', '),'err'); return; }
+
+    progSet(tid, 60, 'Parsing ' + (lines.length-1) + ' rows…', 1);
+
+    var rows = [];
+    for (var i = 1; i < lines.length; i++) {
+      var vals = splitCSV(lines[i]);
+      if (vals.every(function(v){ return !v.trim(); })) continue;
+      var row = {};
+      rawHdr.forEach(function(h, j) { row[h] = (vals[j]||'').trim().replace(/^"|"$/g,''); });
+      rows.push(row);
+    }
+
+    progSet(tid, 90, 'Loading ' + rows.length + ' records…', 2);
+    storeFile(rows, fname, tid);
+    progDone(tid);
+  } catch(e) {
+    progHide(tid);
+    toast('CSV error: ' + e.message, 'err');
+  }
+}
+
+// ── Excel — synchronous after FileReader ──
+function parseXL(buf, fname, tid) {
+  try {
+    if (typeof XLSX === 'undefined') {
+      progHide(tid);
+      toast('Excel library not loaded yet — wait a moment and try again, or save as CSV.', 'err');
+      return;
+    }
+
+    progSet(tid, 50, 'Reading workbook…', 1);
+    var wb = XLSX.read(buf, {type:'array', cellDates:false});
+
+    if (!wb.SheetNames.length) { progHide(tid); toast(fname+': no sheets found.','err'); return; }
+
+    var ws   = wb.Sheets[wb.SheetNames[0]];
+    var data = XLSX.utils.sheet_to_json(ws, {defval:'', raw:true});
+
+    if (!data.length) { progHide(tid); toast(fname+': sheet is empty.','err'); return; }
+
+    var rawKeys = Object.keys(data[0]);
+    var hdrMap  = {};
+    rawKeys.forEach(function(k) { hdrMap[k.trim()] = k; });
+    var normKeys = Object.keys(hdrMap);
+
+    var miss = checkHdrs(normKeys);
+    if (miss.length) { progHide(tid); toast(fname+': missing columns — '+miss.join(', '),'err'); return; }
+
+    progSet(tid, 80, 'Processing ' + data.length + ' records…', 2);
+
+    var rows = data.map(function(row) {
+      var c = {};
+      normKeys.forEach(function(h) {
+        var v = row[hdrMap[h]];
+        c[h] = (h==='startTime'||h==='endTime') ? xlTime(v) : (v==null ? '' : String(v).trim());
+      });
+      return c;
+    });
+
+    progSet(tid, 95, 'Loading…', 2);
+    storeFile(rows, fname, tid);
+    progDone(tid);
+
+  } catch(e) {
+    progHide(tid);
+    toast('Cannot read Excel file: ' + e.message + ' — try saving as CSV.', 'err');
+  }
+}
+
+function xlTime(v) {
+  if (typeof v==='string') return v.trim();
+  if (typeof v==='number') {
+    var m=Math.round(v*24*60),h=Math.floor(m/60)%24,mn=m%60;
+    return String(h).padStart(2,'0')+':'+String(mn).padStart(2,'0');
+  }
+  return String(v||'').trim();
+}
+function splitCSV(line) {
+  var r=[],c='',q=false;
+  for (var i=0;i<line.length;i++) {
+    if (line[i]==='"') q=!q;
+    else if (line[i]===',' && !q) { r.push(c); c=''; }
+    else c+=line[i];
+  }
+  r.push(c); return r;
+}
+function checkHdrs(hdrs) {
+  var n=hdrs.map(function(h){return h.toLowerCase().trim();});
+  return REQUIRED.filter(function(c){return !n.includes(c.toLowerCase());});
+}
+
+// ── Store file to level ──
+function storeFile(rows, fname, tid) {
+  var label = fname.replace(/\.(csv|xlsx|xls)$/i,'');
+  // Tag rows with level info
+  var lv = LVL_MAP[tid] || tid;
+  var tagged = rows.map(function(r) {
+    var o=Object.assign({},r);
+    // If level not set in data, default to the tab's level
+    if (!o.level) o.level = lv;
+    o._src = label;
+    return o;
+  });
+  lvlData[tid] = {rows:tagged, name:fname, label:label};
+  updateChip(tid);
+  saveLS();
+  refreshAll();
+  toast('Loaded '+rows.length+' record'+(rows.length!==1?'s':'')+' into '+lv,'ok');
+}
+
+function removeLvlFile(tid) {
+  var lv = LVL_MAP[tid];
+  lvlData[tid] = null;
+  updateChip(tid);
+  saveLS();
+  refreshAll();
+  toast('Removed '+lv+' data','ok');
+}
+
+function updateChip(tid) {
+  var cr=gid('cr-'+tid);
+  var d=lvlData[tid];
+  if (!d) { if(cr) cr.style.display='none'; return; }
+  var cn=gid('cn-'+tid), cc=gid('cc-'+tid);
+  if (cn) cn.textContent=d.label;
+  if (cc) cc.textContent=d.rows.length;
+  if (cr) cr.style.display='flex';
+}
+
+// ══════════════════ SESSION FILE (no localStorage — works for any data size) ══════════════════
+function saveLS() {
+  // localStorage removed — data too large. Session file is the save method.
+  setSessStatus('💾 Remember to Save session before closing!');
+}
+
+function clearAll() {
+  if (!confirm('Remove all student data from this page?')) return;
+  lvlData={s1:null,s2:null,s3:null,s4:null};
+  ['s1','s2','s3','s4'].forEach(updateChip);
+  refreshAll();
+  setSessStatus('');
+  toast('All data cleared','ok');
+}
+
+function setSessStatus(msg) {
+  var el=gid('sess-status'); if(el) el.textContent=msg;
+}
+
+function saveSession() {
+  var all=getAllData();
+  if (!all.length) { toast('No data to save.','err'); return; }
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify({_t:'sfdr6',d:lvlData})],{type:'application/json'}));
+  a.download='StudentFinder_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  setSessStatus('Session saved ✓ — load it next time to restore your data');
+  toast('Session file saved — keep it safe!','ok');
+}
+
+function loadSession(e) {
+  var file=e.target.files[0]; if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(ev) {
+    try {
+      var p=JSON.parse(ev.target.result);
+      if (p._t==='sfdr6' && p.d) {
+        lvlData=p.d;
+        ['s1','s2','s3','s4'].forEach(updateChip);
+        refreshAll();
+        setSessStatus('💾 Remember to Save session before closing!');
+        toast('Session restored.','ok');
+      } else throw new Error('Unknown format');
+    } catch(err){ toast('Could not read session file.','err'); }
+  };
+  reader.readAsText(file); e.target.value='';
+}
+
+// ══════════════════ REFRESH ══════════════════
+function refreshAll() {
+  document.getElementById('exportBtn').disabled = !getAllData().length;
+  TABS.forEach(function(t) { populateFP(t); doApply(t); });
+  updateStats();
+  updateTabCounts();
+}
+
+// ══════════════════ TABS ══════════════════
+function switchTab(t) {
+  curTab=t;
+  TABS.forEach(function(x) {
+    var btn=gid('tb-'+x), pg=gid('tp-'+x);
+    if (btn) btn.className='tbtn'+(x===t?' active':'');
+    if (pg) pg.style.display=x===t?(x==='all'?'flex':'flex'):'none';
+  });
+}
+function updateTabCounts() {
+  var all=getAllData();
+  gid('tc-all').textContent=all.length||'—';
+  Object.keys(LVL_MAP).forEach(function(tid) {
+    var el=gid('tc-'+tid);
+    var cnt=lvlData[tid]?lvlData[tid].rows.length:0;
+    if(el) el.textContent=cnt||'—';
+  });
+}
+
+// ══════════════════ FILTERS ══════════════════
+function getFKeys(tid) { return tid==='all'?ALL_FKEYS:LVL_FKEYS; }
+
+function populateFP(tid) {
+  var base = tid==='all' ? getAllData() : (lvlData[tid]?lvlData[tid].rows:[]);
+  var keys = getFKeys(tid);
+  keys.filter(function(k){return k!=='week';}).forEach(function(k) {
+    var sel=gid('f-'+tid+'-'+k); if(!sel) return;
+    var cur=sel.value, seen={}, vals=[];
+    base.forEach(function(r){ var v=r[k]; if(v&&!seen[v]){seen[v]=1;vals.push(v);} });
+    vals.sort(function(a,b){
+      if(k==='day')return (DAY_ORDER[a.toLowerCase()]||9)-(DAY_ORDER[b.toLowerCase()]||9);
+      return a.localeCompare(b);
+    });
+    var ph=sel.options[0]?sel.options[0].text:'All';
+    sel.innerHTML='<option value="">'+ph+'</option>'
+      +vals.map(function(v){return '<option value="'+esc(v)+'"'+(v===cur?' selected':'')+'>'+esc(v)+'</option>';}).join('');
+  });
+}
+
+function doApply(tid) {
+  var base = tid==='all' ? getAllData() : (lvlData[tid]?lvlData[tid].rows:[]);
+  var keys = getFKeys(tid);
+  var search=(gid('si-'+tid)||{}).value||'';
+  search=search.toLowerCase().trim();
+  var filters={};
+  keys.forEach(function(k){var el=gid('f-'+tid+'-'+k);filters[k]=el?el.value.trim():'';});
+
+  var data=base.filter(function(r){
+    var ok=keys.every(function(k){
+      if(!filters[k]) return true;
+      var rv=String(r[k]||'').trim();
+      if(k==='week') return rv.toLowerCase()===filters[k].toLowerCase();
+      return rv===filters[k];
+    });
+    if(!ok) return false;
+    if(!search) return true;
+    var hay=[...REQUIRED,'remarks','week'].map(function(c){return String(r[c]||'').toLowerCase();}).join(' ');
+    return hay.includes(search);
+  });
+
+  var sv=(gid('ss-'+tid)||{}).value;
+  if(sv) data.sort(function(a,b){
+    var va=String(a[sv]||'').toLowerCase(),vb=String(b[sv]||'').toLowerCase();
+    if(sv==='day') return (DAY_ORDER[va]||9)-(DAY_ORDER[vb]||9);
+    return va.localeCompare(vb);
+  });
+
+  tState[tid].filtered=data; tState[tid].selected=null;
+
+  var cnt=Object.values(filters).filter(Boolean).length;
+  var fb=gid('fb-'+tid);
+  if(fb){fb.textContent=cnt;fb.style.display=cnt?'inline':'none';}
+
+  renderTab(tid);
+  if(tid==='all') updateStats();
+}
+
+function clrFilters(tid) {
+  getFKeys(tid).forEach(function(k){var el=gid('f-'+tid+'-'+k);if(el)el.value='';});
+  doApply(tid);
+}
+function onSearch(tid,el) {
+  var sc=gid('sc-'+tid); if(sc) sc.style.display=el.value?'inline':'none';
+  doApply(tid);
+}
+function clrSearch(tid) {
+  var si=gid('si-'+tid);if(si)si.value='';
+  var sc=gid('sc-'+tid);if(sc)sc.style.display='none';
+  doApply(tid);
+}
+
+// ══════════════════ STATS ══════════════════
+function updateStats() {
+  var all=getAllData(),show=tState['all'].filtered;
+  var t=all.length;
+  gid('st-total').textContent=t||'—';
+  gid('st-cls').textContent=t?uniq(all,'formClass').length:'—';
+  gid('st-subj').textContent=t?uniq(all,'subject').length:'—';
+  gid('st-tch').textContent=t?uniq(all,'subjectTeacher').length:'—';
+  gid('st-show').textContent=t?show.length:'—';
+  var rc=gid('rc-all');
+  if(rc) rc.innerHTML=t?'<strong>'+show.length+'</strong> of '+t+' student'+(t!==1?'s':''):'—';
+}
+function uniq(arr,k){var s={};return arr.filter(function(r){var v=r[k];if(s[v])return false;s[v]=1;return true;});}
+
+// ══════════════════ RENDER ══════════════════
+function setView(tid,v) {
+  tState[tid].view=v;
+  var vc=gid('vc-'+tid),vt=gid('vt-'+tid);
+  if(vc)vc.className='vbtn'+(v==='card'?' active':'');
+  if(vt)vt.className='vbtn'+(v==='table'?' active':'');
+  renderTab(tid);
+}
+
+function renderTab(tid) {
+  var st=tState[tid];
+  var base=tid==='all'?getAllData():(lvlData[tid]?lvlData[tid].rows:[]);
+  var em=gid('em-'+tid),cg=gid('cg-'+tid),tb=gid('tbl-'+tid);
+  if(!em||!cg||!tb) return;
+
+  if(tid!=='all'){
+    var rc=gid('rc-'+tid);
+    if(rc) rc.innerHTML=base.length
+      ?'<strong>'+st.filtered.length+'</strong> of '+base.length+' student'+(base.length!==1?'s':'')
+      :'—';
+  }
+
+  if(!base.length){
+    em.style.display='flex';cg.style.display='none';tb.style.display='none';
+    if(tid==='all'){em.querySelector('h3').textContent='No data loaded yet';em.querySelector('p').textContent='Go to Sec 1, Sec 2, Sec 3 or Sec 4 tabs and upload each level\'s file.';}
+    return;
+  }
+  if(!st.filtered.length){
+    em.style.display='flex';cg.style.display='none';tb.style.display='none';
+    em.querySelector('h3').textContent='No matching students.';
+    em.querySelector('p').textContent='Try adjusting your search or filters.';
+    return;
+  }
+  em.style.display='none';
+
+  if(st.view==='card'){
+    cg.style.display='grid';tb.style.display='none';
+    cg.innerHTML=st.filtered.map(function(r,i){return cardHTML(tid,r,i,st.selected===i);}).join('');
+  } else {
+    cg.style.display='none';tb.style.display='block';
+    tb.innerHTML=tableHTML(tid,st.filtered,st.selected);
+  }
+}
+
+function ini(n){return String(n||'').split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase()||'?';}
+function wbdg(w){var l=String(w||'').toLowerCase();return l==='odd'?'bodd':l==='even'?'beven':'bwk';}
+
+function cardHTML(tid,r,i,sel) {
+  var onclick='selRow(\''+tid+'\','+i+')';
+  return '<div class="card'+(sel?' sel':'')+'" onclick="'+onclick+'">'
+    +'<div class="card-hdr"><div class="avi">'+esc(ini(r.studentName))+'</div>'
+    +'<div><div class="card-name">'+esc(r.studentName)+'</div><div class="card-cls">'+esc(r.formClass)+' · '+esc(r.level)+'</div></div></div>'
+    +'<div class="badges">'
+    +'<span class="bdg bsubj">'+esc(r.subject)+'</span>'
+    +'<span class="bdg bstream">'+esc(r.stream)+'</span>'
+    +'<span class="bdg bday">'+esc(r.day)+'</span>'
+    +(r.week?'<span class="bdg '+wbdg(r.week)+'">'+esc(r.week)+' Wk</span>':'')
+    +'</div>'
+    +'<div class="card-meta">'
+    +'<div class="cmrow"><span class="ico">👩‍🏫</span><strong>'+esc(r.subjectTeacher)+'</strong></div>'
+    +'<div class="cmrow"><span class="ico">🕐</span><strong>'+esc(r.startTime)+' – '+esc(r.endTime)+'</strong></div>'
+    +'<div class="cmrow"><span class="ico">📍</span><strong>'+esc(r.venue)+'</strong></div>'
+    +'</div></div>';
+}
+
+function tableHTML(tid,rows,sel) {
+  var cols=[{k:'studentName',l:'Student Name'},{k:'formClass',l:'Class'},{k:'level',l:'Level'},
+    {k:'subject',l:'Subject'},{k:'stream',l:'Stream'},{k:'subjectTeacher',l:'Teacher'},
+    {k:'day',l:'Day'},{k:'week',l:'Week'},{k:'startTime',l:'Start'},{k:'endTime',l:'End'},
+    {k:'venue',l:'Venue'},{k:'remarks',l:'Remarks'}];
+  var sf=tState[tid].sort;
+  var thead='<thead><tr>'+cols.map(function(c){
+    var onclick='tSort(\''+tid+'\',\''+c.k+'\')';
+    return '<th class="'+(sf===c.k?'sa':'')+'" onclick="'+onclick+'">'+c.l+' '+(sf===c.k?'↑':'⇅')+'</th>';
+  }).join('')+'</tr></thead>';
+  var tbody='<tbody>'+rows.map(function(r,i){
+    var onclick='selRow(\''+tid+'\','+i+')';
+    return '<tr class="'+(sel===i?'sel':'')+'" onclick="'+onclick+'">'
+      +'<td class="tn">'+esc(r.studentName)+'</td><td>'+esc(r.formClass)+'</td><td>'+esc(r.level)+'</td>'
+      +'<td><span class="bdg bsubj">'+esc(r.subject)+'</span></td>'
+      +'<td><span class="bdg bstream">'+esc(r.stream)+'</span></td>'
+      +'<td>'+esc(r.subjectTeacher)+'</td>'
+      +'<td><span class="bdg bday">'+esc(r.day)+'</span></td>'
+      +'<td>'+(r.week?'<span class="bdg '+wbdg(r.week)+'">'+esc(r.week)+'</span>':'—')+'</td>'
+      +'<td>'+esc(r.startTime)+'</td><td>'+esc(r.endTime)+'</td><td>'+esc(r.venue)+'</td>'
+      +'<td style="color:var(--muted);max-width:130px;overflow:hidden;text-overflow:ellipsis">'+esc(r.remarks||'')+'</td>'
+      +'</tr>';
+  }).join('')+'</tbody>';
+  return '<div class="twrap"><table>'+thead+tbody+'</table></div>';
+}
+
+function tSort(tid,field) {
+  tState[tid].sort=field;
+  var ss=gid('ss-'+tid);
+  if(ss){var o=[...ss.options];if(o.some(function(x){return x.value===field;}))ss.value=field;}
+  doApply(tid);
+}
+
+// ══════════════════ DETAIL PANEL ══════════════════
+function selRow(tid,i) {
+  tState[tid].selected=i;
+  var r=tState[tid].filtered[i];
+  var dp=gid('dp-'+tid); if(dp) dp.className='dp';
+  renderDP(tid,r);
+  renderTab(tid);
+}
+function closeDP(tid) {
+  tState[tid].selected=null;
+  var dp=gid('dp-'+tid); if(dp) dp.className='dp hidden';
+  renderTab(tid);
+}
+function renderDP(tid,r) {
+  var body=gid('dpb-'+tid); if(!body) return;
+  var rem=String(r.remarks||'').trim();
+  body.innerHTML=
+    '<div class="dp-avrow"><div class="dp-av">'+esc(ini(r.studentName))+'</div>'
+    +'<div><div class="dp-name">'+esc(r.studentName)+'</div><div class="dp-cls">'+esc(r.formClass)+' · '+esc(r.level)+'</div></div></div>'
+    +'<div class="dp-sec"><div class="dp-st">Lesson Info</div>'
+    +'<div class="dp-f"><div class="dp-fl">Subject</div><div class="dp-fv"><span class="bdg bsubj">'+esc(r.subject)+'</span></div></div>'
+    +'<div class="dp-f"><div class="dp-fl">Stream</div><div class="dp-fv"><span class="bdg bstream">'+esc(r.stream)+'</span></div></div>'
+    +'<div class="dp-f"><div class="dp-fl">Teacher</div><div class="dp-fv">'+esc(r.subjectTeacher)+'</div></div>'
+    +'</div>'
+    +'<div class="dp-sec"><div class="dp-st">Schedule</div>'
+    +'<div class="dp-f"><div class="dp-fl">Day</div><div class="dp-fv" style="display:flex;gap:5px;flex-wrap:wrap">'
+    +'<span class="bdg bday">'+esc(r.day)+'</span>'
+    +(r.week?'<span class="bdg '+wbdg(r.week)+'">'+esc(r.week)+' Week</span>':'')
+    +'</div></div>'
+    +'<div class="dp-tr">'
+    +'<div class="dp-tb"><div class="dp-tl">Start</div><div class="dp-tv">'+esc(r.startTime)+'</div></div>'
+    +'<div style="color:var(--light)">→</div>'
+    +'<div class="dp-tb"><div class="dp-tl">End</div><div class="dp-tv">'+esc(r.endTime)+'</div></div>'
+    +'</div>'
+    +'<div class="dp-f"><div class="dp-fl">Venue</div><div class="dp-fv">'+esc(r.venue)+'</div></div>'
+    +'</div>'
+    +'<div class="dp-sec"><div class="dp-st">Remarks</div>'
+    +'<div class="dp-rem'+(rem?'':' e')+'">'+( rem?esc(rem):'No remarks provided.')+'</div>'
+    +'</div>';
+}
+
+// ══════════════════ EXPORT ══════════════════
+function doExport() {
+  var data=tState[curTab].filtered;
+  if(!data.length){toast('No data to export.','err');return;}
+  var cols=['studentName','formClass','level','subject','stream','subjectTeacher','day','week','startTime','endTime','venue','remarks'];
+  var rows=data.map(function(r){
+    return cols.map(function(c){
+      var v=String(r[c]||'');
+      return (v.includes(',')||v.includes('"'))?'"'+v.replace(/"/g,'""')+'"':v;
+    }).join(',');
+  });
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([[cols.join(','),...rows].join('\n')],{type:'text/csv'}));
+  a.download='StudentFinder_'+curTab+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  toast('Exported '+data.length+' records.','ok');
+}
+
+// ══════════════════ SAMPLE DATA ══════════════════
+var SAMPLES = {
+  s1: {name:'Sec1_sample.csv', csv:'studentName,formClass,level,subject,stream,subjectTeacher,day,week,startTime,endTime,venue,remarks\nKai Ren Lim,1E2,Sec 1,Science,G2,Mr Tan,Friday,Odd,11:30,12:30,Science Lab 1,\nAmirah Binte Yusof,1E3,Sec 1,Mathematics,G2,Mr Lim,Tuesday,Even,09:15,10:15,Classroom 4-01,\nYasmin Abdul,1E4,Sec 1,English,G3,Ms Lee,Wednesday,Even,09:15,10:15,Classroom 3-03,\nHarith Lim,1E5,Sec 1,Humanities,G2,Ms Noor,Thursday,Odd,12:30,13:30,Classroom 2-04,\nJordan Seow,1E1,Sec 1,Mathematics,G3,Mr Ong,Monday,Odd,08:00,09:00,Classroom 5-01,\nNurul Huda,1E2,Sec 1,English,G3,Ms Lee,Tuesday,Even,10:15,11:15,Classroom 3-02,'},
+  s2: {name:'Sec2_sample.csv', csv:'studentName,formClass,level,subject,stream,subjectTeacher,day,week,startTime,endTime,venue,remarks\nRyan Tan,2E3,Sec 2,Mathematics,G3,Mr Lim,Monday,Odd,09:15,10:15,Classroom 4-02,Full SBB student\nAlicia Ng,2E1,Sec 2,English,G3,Ms Lee,Monday,Even,10:15,11:15,Classroom 3-01,\nDanish Rahman,2E4,Sec 2,Science,G2,Mr Tan,Tuesday,Odd,08:00,09:00,Science Lab 1,Needs support\nSophia Goh,2E2,Sec 2,English,G3,Ms Lee,Monday,Odd,08:00,09:00,Classroom 3-01,\nBryan Teo,2E3,Sec 2,Humanities,G2,Ms Noor,Wednesday,Odd,14:30,15:30,Classroom 2-05,'},
+  s3: {name:'Sec3_sample.csv', csv:'studentName,formClass,level,subject,stream,subjectTeacher,day,week,startTime,endTime,venue,remarks\nChloe Wong,3E2,Sec 3,Mathematics,G3,Mr Ong,Wednesday,Even,11:30,12:30,Classroom 5-03,\nPriya Subramaniam,3E1,Sec 3,English,G3,Ms Lee,Thursday,Even,08:00,09:00,Classroom 3-02,SPED support\nMarcus Seah,3E3,Sec 3,Humanities,G2,Ms Noor,Tuesday,Odd,10:15,11:15,Classroom 2-06,\nEthan Koh,3E4,Sec 3,Science,G3,Mr Tan,Friday,Even,10:15,11:15,Science Lab 2,'},
+  s4: {name:'Sec4_sample.csv', csv:'studentName,formClass,level,subject,stream,subjectTeacher,day,week,startTime,endTime,venue,remarks\nAlex Tan,4E1,Sec 4,English,G3,Ms Lee,Monday,Odd,08:00,09:00,Classroom 3-04,\nSarah Ng,4E2,Sec 4,Mathematics,G3,Mr Ong,Tuesday,Even,09:15,10:15,Classroom 5-04,\nJamil Hassan,4E3,Sec 4,Science,G2,Mr Tan,Wednesday,Odd,11:30,12:30,Science Lab 3,\nRajesh Kumar,4E4,Sec 4,Mathematics,G3,Mr Lim,Friday,Odd,14:30,15:30,Classroom 4-04,O Level prep'}
+};
+function loadSample() {
+  Object.keys(SAMPLES).forEach(function(tid) {
+    var s=SAMPLES[tid];
+    parseCSV(s.csv, s.name, tid);
+  });
+}
+
+// ══════════════════ HELPERS ══════════════════
+function gid(id){return document.getElementById(id);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function toast(msg,type){
+  var t=document.createElement('div');
+  t.className='toast '+(type==='err'?'terr':'tok');
+  t.textContent=msg;
+  gid('toasts').appendChild(t);
+  setTimeout(function(){t.remove();},4000);
+}
+
+// ══════════════════ BAKE DATA INTO APP ══════════════════
+// Generates a new index.html with all data embedded — upload to GitHub
+// and the app opens with everything pre-loaded, no uploads needed.
+function bakeData() {
+  var all = getAllData();
+  if (!all.length) { toast('No data loaded. Upload your files first.', 'err'); return; }
+
+  setSessStatus('Generating app with embedded data…');
+
+  // Get the current page HTML
+  var html = document.documentElement.outerHTML;
+
+  // Build the data payload
+  var payload = JSON.stringify({_t:'sfdr6', d:lvlData});
+
+  // 1. Inject pre-loaded data variable before the init function
+  var dataScript = '\n// ══ PRE-LOADED DATA (baked in) ══\nvar BAKED_DATA = ' + payload + ';\n';
+  html = html.replace(
+    '// ══════════════════ INIT ══════════════════',
+    dataScript + '// ══════════════════ INIT ══════════════════'
+  );
+
+  // 2. Replace init to use baked data on startup
+  html = html.replace(
+    "(function init(){\n  TABS.forEach(function(t){renderTab(t);});\n  updateStats();\n  setSessStatus('\uD83D\uDCBE Save session after uploading \u2014 then load it next time');\n})();",
+    "(function init(){\n  if (typeof BAKED_DATA !== 'undefined' && BAKED_DATA && BAKED_DATA.d) {\n    lvlData = BAKED_DATA.d;\n    ['s1','s2','s3','s4'].forEach(updateChip);\n    refreshAll();\n    setSessStatus('Data pre-loaded \u2713 (' + getAllData().length + ' students)');\n    toast('All student data loaded automatically!', 'ok');\n  } else {\n    TABS.forEach(function(t){renderTab(t);});\n    updateStats();\n    setSessStatus('\uD83D\uDCBE Save session after uploading \u2014 then load it next time');\n  }\n})();"
+  );
+
+  // 3. Download the baked HTML as index.html
+  var blob = new Blob([html], {type: 'text/html'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'index.html';
+  a.click();
+
+  setSessStatus('✅ index.html downloaded — upload it to GitHub Pages!');
+  toast('Done! Upload the new index.html to GitHub — data opens automatically.', 'ok');
+}
+
+// ══════════════════ INIT ══════════════════
+(function init(){
+  TABS.forEach(function(t){renderTab(t);});
+  updateStats();
+  setSessStatus('💾 Save session after uploading — then load it next time');
+})();
+</script>
+</body>
+</html>
